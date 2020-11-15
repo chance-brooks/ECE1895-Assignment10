@@ -1,10 +1,11 @@
 //declare pins
-const int microphonePin;
-const int buttonPin;
-const int joystickPin;
-const int sr_dataPin;
-const int sr_clockPin;
-const int sr_latchPin;
+const int microphonePin = PC0;
+const int buttonPin = PC1;
+const int joystickPin1 = PC2;
+const int joystickPin2 = PC3;
+const int sr_dataPin = PD0;
+const int sr_clockPin = PD1;
+const int sr_latchPin = PD2;
 
 //declare variables
 int newGame;
@@ -15,7 +16,8 @@ void setup() {
   Serial.begin(9600);
   pinMode(microphonePin, INPUT);
   pinMode(buttonPin, INPUT);
-  pinMode(joystickPin, INPUT);
+  pinMode(joystickPin1, INPUT);
+  pinMode(joystickPin2, INPUT);
   pinMode(sr_dataPin, OUTPUT);
   pinMode(sr_clockPin, OUTPUT);
   pinMode(sr_latchPin, OUTPUT);
@@ -51,8 +53,6 @@ void loop() {
     displayScore();
   }
   
-  //display losing score
-  displayScore();
 }
 
 int fetchInstruction() {
@@ -68,11 +68,15 @@ int readInputMicrophone() {
 }
 
 int readInputButton() {
-  return digitalRead(buttonPin);
+  if (analogRead(buttonPin) != 0)
+    return 1;
+  return 0;
 }
 
 int readInputJoystick() {
-  return digitalRead(joystickPin);
+  if (analogRead(joystickPin1) != 0 || analogRead(joystickPin2) != 0)
+    return 1;
+  return 0;
 }
 
 void displayScore() {
