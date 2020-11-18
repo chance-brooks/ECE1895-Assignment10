@@ -3,14 +3,21 @@ const int microphonePin = PC0;
 const int buttonPin = PC1;
 const int joystickPin1 = PC2;
 const int joystickPin2 = PC3;
+
 const int sr_dataPin = PD0;
 const int sr_clockPin = PD1;
 const int sr_latchPin = PD2;
+const int buzzer = PD3;
+const int LED1 = PD5;
+const int LED2 = PD6; 
+const int LED3 = PD7;
 
 //declare variables
 int newGame;
 int score;
 int currInstruction;
+int restingJoystick1;
+int restingJoystick2;
 
 void setup() {
   Serial.begin(9600);
@@ -18,15 +25,25 @@ void setup() {
   pinMode(buttonPin, INPUT);
   pinMode(joystickPin1, INPUT);
   pinMode(joystickPin2, INPUT);
+  
+  pinMode(buzzer, OUTPUT);
+  pinMode(LED1, OUTPUT);
+  pinMode(LED2, OUTPUT);
+  pinMode(LED3, OUTPUT);
   pinMode(sr_dataPin, OUTPUT);
   pinMode(sr_clockPin, OUTPUT);
   pinMode(sr_latchPin, OUTPUT);
   digitalWrite(sr_latchPin, HIGH);
+
+  //instantiate game
   score = 0;
   newGame = 0;
+  //get resting joystick positions
+  restingJoystick1 = analogRead(joystickPin1);
+  restingJoystick2 = analogRead(joystickPin2);
 }
 
-void loop() {
+void loop() {  
   //check for new game request
   if (readInputButton() == 1) {
     newGame = 1;
@@ -60,7 +77,28 @@ int fetchInstruction() {
 }
 
 void playInstruction(int instruction) {
-  //play tone and shine LED for each instruction
+  //play tone and light LED based on instruction
+  if (instruction == 1) {
+    digitalWrite(LED1, HIGH);
+    tone(buzzer, 500);
+    delay(100);
+    noTone(buzzer);
+    digitalWrite(LED1, LOW);
+  }
+  else if (instruction == 2) {
+    digitalWrite(LED2, HIGH);
+    tone(buzzer, 1000);
+    delay(100);
+    noTone(buzzer);
+    digitalWrite(LED2, LOW);
+  }
+  else if (instruction == 3) {
+    digitalWrite(LED3, HIGH);
+    tone(buzzer, 1500);
+    delay(100);
+    noTone(buzzer);
+    digitalWrite(LED3, LOW);
+  }
 }
 
 int readInputMicrophone() {
@@ -68,13 +106,13 @@ int readInputMicrophone() {
 }
 
 int readInputButton() {
-  if (analogRead(buttonPin) != 0)
+  if (analogRead(buttonPin) > 500)
     return 1;
   return 0;
 }
 
 int readInputJoystick() {
-  if (analogRead(joystickPin1) != 0 || analogRead(joystickPin2) != 0)
+  if (abs(analogRead(joystickPin1)-restingJoystick1) > 300 || abs(analogRead(joystickPin2)-restingJoystick2) > 300)
     return 1;
   return 0;
 }
