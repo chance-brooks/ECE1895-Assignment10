@@ -34,15 +34,16 @@ void setup() {
   pinMode(sr_clockPin, OUTPUT);
   pinMode(sr_latchPin, OUTPUT);
   digitalWrite(sr_latchPin, HIGH);
+
+  //instantiate game
   score = 0;
   newGame = 0;
-}
-
-void loop() {
   //get resting joystick positions
   restingJoystick1 = analogRead(joystickPin1);
   restingJoystick2 = analogRead(joystickPin2);
-  
+}
+
+void loop() {  
   //check for new game request
   if (readInputButton() == 1) {
     newGame = 1;
