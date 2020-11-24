@@ -15,6 +15,8 @@ const int LED3 = PD7;
 //declare variables
 int newGame;
 int score;
+int timeLimit;
+int count;
 int currInstruction;
 int restingJoystick1;
 int restingJoystick2;
@@ -44,6 +46,7 @@ void setup() {
 }
 
 void loop() {  
+  
   //check for new game request
   if (readInputButton() == 1) {
     newGame = 1;
@@ -56,14 +59,74 @@ void loop() {
     //get new command
     currInstruction = fetchInstruction();
     playInstruction(currInstruction);
-    
+
+    //set time limit
+    count = 0;
+    if (score < 10) timeLimit = 30;
+    else if (score < 25) timeLimit = 20;
+    else if (score < 50) timeLimit = 15;
+    else if (score < 75) timeLimit = 10;
+    else if (score < 90) timeLimit = 5;
+    else timeLimit = 1;
+
     //check for correct input
-    if (currInstruction==1 && readInputMicrophone()==1) score++;
-    else if (currInstruction==2 && readInputButton()==1) score++;
-    else if (currInstruction==3 && readInputJoystick()==1) score++;
-    else {
+    for (int i=0; i<timeLimit; i++) {
+      if (currInstruction==1 && readInputMicrophone()==1) {
+        score++;
+        count = 0;
+        break;
+      }
+      else if (currInstruction==2 && readInputButton()==1) {
+        score++;
+        count = 0;
+        break;
+      }
+      else if (currInstruction==3 && readInputJoystick()==1) {
+        score++;
+        count = 0;
+        break;
+      }
+      else if (readInputButton()==0 && readInputJoystick()==0 && readInputMicrophone()==0)  //no input
+        count++;
+      else {  //wrong input
+        count = timeLimit;
+        break;
+      }
+      delay(100);
+    }
+
+    //check for loss
+    if (count = timeLimit) {
+      tone(buzzer, 500);
+      delay(50);
+      noTone(buzzer);
+      delay(50);
+      tone(buzzer, 500);
+      delay(50);
+      noTone(buzzer);
+      delay(50);
+      tone(buzzer, 500);
+      delay(150);
+      noTone(buzzer);
+      delay(50);
       newGame = 0;
-      //play sound or LEDs to indicate loss. Keep score same. Will reset on new game so last score keeps displayed after loss
+    }
+
+    //check for win
+    if (score == 99) {
+      tone(buzzer, 2000);
+      delay(50);
+      noTone(buzzer);
+      delay(50);
+      tone(buzzer, 2000);
+      delay(50);
+      noTone(buzzer);
+      delay(50);
+      tone(buzzer, 2500);
+      delay(150);
+      noTone(buzzer);
+      delay(50);
+      newGame = 0;
     }
     
     //display score to user
@@ -80,21 +143,21 @@ void playInstruction(int instruction) {
   //play tone and light LED based on instruction
   if (instruction == 1) {
     digitalWrite(LED1, HIGH);
-    tone(buzzer, 500);
+    tone(buzzer, 1000);
     delay(100);
     noTone(buzzer);
     digitalWrite(LED1, LOW);
   }
   else if (instruction == 2) {
     digitalWrite(LED2, HIGH);
-    tone(buzzer, 1000);
+    tone(buzzer, 1500);
     delay(100);
     noTone(buzzer);
     digitalWrite(LED2, LOW);
   }
   else if (instruction == 3) {
     digitalWrite(LED3, HIGH);
-    tone(buzzer, 1500);
+    tone(buzzer, 2000);
     delay(100);
     noTone(buzzer);
     digitalWrite(LED3, LOW);
@@ -178,5 +241,5 @@ byte num2seg(int n) {
       out = B10010011;
       break;
   }
-  return out;
+  return B11111111 ^ out;
 }
